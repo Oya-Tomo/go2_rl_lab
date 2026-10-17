@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "go2_rl_lab"
+version = "0.1.7"
+description = "Go2 locomotion training environments for Isaac Lab."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Tianyang Wu" },
+]
+maintainers = [
+    { name = "Tianyang Wu" },
+]
+dependencies = [
+    # Installed in editable mode from ../rsl_rl by go2_rl_lab.sh.
+    "rsl-rl-lib==3.3.0",
+]
+
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+video = [
+    "imageio-ffmpeg>=0.6.0",
+]
+mujoco = [
+    "mujoco>=3.3.0",
+    "PyYAML>=6.0",
+    "pygame>=2.6.0",
+    "imageio>=2.37.0",
+    "imageio-ffmpeg>=0.6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["go2_rl_lab*"]
+
+[tool.setuptools.package-data]
+go2_rl_lab = [
+    "assets/usd/**/*.usd",
+]

@@ -1,0 +1,81 @@
+# C++
+**/cmake-build*/
+**/build*/
+**/*.so
+**/*.log*
+
+# Omniverse
+**/*.dmp
+**/.thumbs
+
+# Newton/ImGui viewer state
+/imgui.ini
+
+# USD files are ignored except for the bundled Go2 model
+**/*.usd
+**/*.usda
+**/*.usdc
+**/*.usdz
+!source/go2_rl_lab/go2_rl_lab/assets/usd/**/*.usd
+
+# Python
+/.env/
+.DS_Store
+**/*.egg-info/
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+**/*.pb
+# Local validation scripts, reports, and artifacts are never published.
+/tests/
+
+# IDE
+**/.idea/
+**/.vscode/
+/pyrightconfig.json
+
+# Outputs
+**/output/*
+**/outputs/*
+**/videos/*
+**/wandb/*
+**/swanlog/*
+*.tmp
+
+# Doc Outputs
+**/docs/_build/*
+**/generated/*
+
+# Isaac-Sim packman
+_isaac_sim*
+_repo
+_build
+.lastformat
+
+# RL-Games
+**/runs/*
+**/logs/*
+**/recordings/*
+
+# Pre-Trained Checkpoints
+/.pretrained_checkpoints/
+
+# Teleop Recorded Dataset
+datasets
+
+# Generated policy and mesh files
+*.pt
+*.obj
+!deploy/deploy_mujoco/assets/go2/*.obj
+deploy/deploy_mujoco/models/
+*.mtl
+*.STL
+**/env.yaml
+MUJOCO_LOG.TXT
+
+# Debug
+mydebug*
+mytest*
+
+# Agents
+opencode.json
