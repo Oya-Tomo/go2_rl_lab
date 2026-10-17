@@ -6,7 +6,7 @@
 </div>
 
 <p align="center">
-	<strong>This repository builds on <a href="https://github.com/unitreerobotics/unitree_rl_gym">unitree_rl_gym</a> to train the Unitree Go2 quadruped with reinforcement learning.</br>For the IsaacLab-based version, see <a href="https://github.com/wertyuilife2/go2_rl_robotlab">go2_rl_robotlab</a>.</strong>
+	<strong>This repository builds on <a href="https://github.com/unitreerobotics/unitree_rl_gym">unitree_rl_gym</a> to train the Unitree Go2 quadruped with reinforcement learning.</br>For the IsaacLab-based version, see <a href="https://github.com/wty-yy/go2_rl_lab/tree/lab">go2_rl_lab</a>.</strong>
 </p>
 
 <div align="center">

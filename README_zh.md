@@ -6,7 +6,7 @@
 </div>
 
 <p align="center">
-  <strong>本仓库基于<a href="https://github.com/unitreerobotics/unitree_rl_gym">unitree_rl_gym</a>，使用强化学习训练Go2机器狗。</br>基于IsaacLab开发的版本请见<a href="https://github.com/wertyuilife2/go2_rl_robotlab">go2_rl_robotlab</a>。</strong> 
+  <strong>本仓库基于<a href="https://github.com/unitreerobotics/unitree_rl_gym">unitree_rl_gym</a>，使用强化学习训练Go2机器狗。</br>基于IsaacLab开发的版本请见<a href="https://github.com/wty-yy/go2_rl_lab/tree/lab">go2_rl_lab</a>。</strong>
 </p>
 
 <div align="center">
