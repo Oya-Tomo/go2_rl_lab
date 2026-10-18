@@ -1,18 +1,62 @@
 <div align="center">
   <h1>Go2 RL Lab</h1>
-  <p><strong>基于 Isaac Lab 3.0 EA 的 Unitree Go2 速度运动控制<br><a href="https://github.com/wty-yy/go2_rl_lab/tree/gym">（原 go2_rl_gym 分支）</a></strong></p>
+  <p><strong>基于 Isaac Lab 的 Unitree Go2 高速灵巧速度运动控制<br><a href="https://github.com/wty-yy/go2_rl_lab/tree/gym">（原 go2_rl_gym 分支）</a></strong></p>
   <p>
     <a href="https://isaac-sim.github.io/IsaacLab/"><img height="20" src="https://img.shields.io/badge/Isaac%20Lab-3.0%20EA-silver.svg" alt="Isaac Lab 3.0 EA"></a>&nbsp;
+    <a href="https://swanlab.cn/@wty-yy/go2-rl-lab/v1/lxqfax/overview"><img height="20" src="https://raw.githubusercontent.com/SwanHubX/assets/main/badge1.svg" alt="SwanLab"></a>&nbsp;
     <a href="LICENSE"><img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
   </p>
-  <p><a href="README.md">🌎 English</a>&nbsp;&nbsp;·&nbsp;&nbsp;<strong>🇨🇳 中文</strong></p>
+  <p><a href="README.md">🌎 English</a>&nbsp;&nbsp;·&nbsp;&nbsp;<strong>🇨🇳 中文</strong>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://www.roboticsproceedings.org/rss22/p156.pdf">📄 Paper [RSS 2026]</a></p>
 </div>
 
-📢 `go2_rl_gym` 正式更名为 `go2_rl_lab`，基于 **Isaac Lab 3.0 EA / Isaac Sim 6.1** 构建，物理后端切换为 **Newton MJWarp**，并做大量改进，更新说明见 [from_gym_to_lab.md](docs/from_gym_to_lab.zh-CN.md)
+📢 `go2_rl_gym` 正式更名为 `go2_rl_lab`，基于 **Isaac Lab 3.0 EA / Isaac Sim 6.1** 构建，物理后端切换为 **Newton MJWarp**，并做大量改进，更新说明见 [from_gym_to_lab.zh-CN.md](docs/from_gym_to_lab.zh-CN.md)
 
-| IsaacSim | MuJoCo | 真机 |
-| :---: | :---: | :---: |
-| <img width="320" alt="Kit 演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_isaaclab_encoded.gif" /> | <img width="320" alt="MuJoCo 演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/python_mujoco_encoded.gif" /> | <img width="320" alt="真机楼梯演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/forward_stairs_DJI_20261017144009_0111_D_encoded.gif" /> |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="33%" align="center"><div align="center">IsaacSim</div></th>
+      <th width="33%" align="center"><div align="center">MuJoCo</div></th>
+      <th width="33%" align="center"><div align="center">真机</div></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><img width="100%" alt="Kit 演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_isaaclab_encoded.gif" /></td>
+      <td align="center"><img width="100%" alt="MuJoCo 演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/python_mujoco_encoded.gif" /></td>
+      <td align="center"><img width="100%" alt="真机楼梯演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/forward_stairs_DJI_20261017144009_0111_D_encoded.gif" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="50%" align="center"><div align="center">3.5m/s前进与4.4m/s后退</div></th>
+      <th width="50%" align="center"><div align="center">奔跑俯视</div></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><img width="100%" alt="真机前进与后退" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/forward_backward_1x_then_0.5x.gif" /></td>
+      <td align="center"><img width="100%" alt="真机快速奔跑" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/overlook_fastrun_DJI_20261017143527_0110_D_encoded.gif" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="50%" align="center"><div align="center">斜坡</div></th>
+      <th width="50%" align="center"><div align="center">楼梯间</div></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><img width="100%" alt="真机斜坡行走" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/slope_DJI_20261017142100_0108_D_encoded.gif" /></td>
+      <td align="center"><img width="100%" alt="真机楼梯间行走" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/stairwell_DJI_20261017145051_0117_D_encoded.gif" /></td>
+    </tr>
+  </tbody>
+</table>
 
 ## 📦 安装
 
@@ -20,7 +64,12 @@
 
 环境安装包含两种方式：Docker容器和uv环境安装
 
-**（方法一）Docker容器环境**：已配置的 Docker 镜像为 [wtyyy/isaaclab:3.0-ea](https://hub.docker.com/r/wtyyy/isaaclab)。使用 `source/rsl_rl` 中的项目版 RSL-RL `3.3.0`
+<details>
+<summary><strong>（方法一）Docker 容器环境</strong></summary>
+
+已配置的 Docker 镜像为 [wtyyy/isaaclab:3.0-ea](https://hub.docker.com/r/wtyyy/isaaclab)。使用 `source/rsl_rl` 中的项目版 RSL-RL `3.3.0`
+
+> 如果当前宿主机用户为 root，请参考 [Docker Hub 中的容器启动方法](https://hub.docker.com/repository/docker/wtyyy/isaaclab/general)。
 
 ```bash
 # 宿主机：启动 EA 运行环境，后续项目命令均在容器内执行
@@ -46,7 +95,10 @@ docker run -it --name go2-rl-lab-3.0 \
 
 将 `/path/to/Coding` 替换为宿主机上你的实际代码存放目录
 
-**（方法二）uv环境安装**：
+</details>
+
+<details>
+<summary><strong>（方法二）uv 环境安装</strong></summary>
 
 ```bash
 uv venv ~/go2-rl-lab-env --python 3.12 --seed --prompt go2-rl-lab  # ~/go2-rl-lab-env 下创建虚拟环境
@@ -54,6 +106,8 @@ source ~/go2-rl-lab-env/bin/activate  # 激活虚拟环境
 uv pip install "torch==2.11.0" "torchvision==0.26.0" --index-url "https://download.pytorch.org/whl/cu128"  # pytorch
 uv pip install --prerelease="allow" --index-strategy unsafe-best-match "isaaclab[isaacsim,all]==3.0.0rc1" --extra-index-url https://pypi.nvidia.com  # isaaclab
 ```
+
+</details>
 
 完成环境安装后安装本仓库
 
@@ -64,6 +118,7 @@ sudo apt update && sudo apt install -y git-lfs
 cd /home/user/Coding  # 容器路径；宿主机安装时替换为实际路径
 git clone --branch lab https://github.com/wty-yy/go2_rl_lab.git
 cd go2_rl_lab
+git lfs pull
 
 # 安装可编辑的 go2_rl_lab、本地 rsl_rl 及录像依赖，并自动生成 VS Code 配置
 ./go2_rl_lab.sh --install
@@ -112,7 +167,20 @@ CUDA_VISIBLE_DEVICES=0,1 ./go2_rl_lab.sh --train-distributed --task go2-mixed-mo
 
 #### 📊 RoboGauge 评估
 
-[RoboGauge](https://github.com/wty-yy/RoboGauge) 可在训练期间异步评估导出策略。在训练环境安装客户端，并在 RoboGauge 环境启动服务端：
+[RoboGauge](https://github.com/wty-yy/RoboGauge) 可在训练期间异步评估导出策略，评估结果如下表所示
+
+| Model | Score | Tracking | Safety | Quality | Level | Download |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| go2_mixed_moe_cts (Lab) | **0.6930** | **0.7004** | 0.7818 | **0.7818** | **8.40** | [ckpt](https://huggingface.co/wty-yy/go2_rl_gym_data/tree/main/go2_rl_lab/2026-10-13_15-35-09_mixed1.3.2resume_82.5k_0.6929) |
+| go2_moe_cts (Gym) | 0.6713 | 0.6669 | **0.7857** | 0.7392 | 7.85 | [ckpt](https://huggingface.co/wty-yy/go2_rl_gym_data/tree/main/go2_moe_cts_137000_0.6713) |
+| [CTS](https://arxiv.org/pdf/2405.10830) vanilla | 0.5786 | 0.5755 | 0.7066 | 0.6624 | 6.83 | [ckpt](https://huggingface.co/wty-yy/go2_rl_gym_data/tree/main/go2_cts_vanilla2_103.5k_0.5786) |
+| [HIM](https://arxiv.org/abs/2312.11460) | 0.5379 | 0.5453 | 0.6476 | 0.6050 | 6.19 | [ckpt](https://huggingface.co/wty-yy/go2_rl_gym_data/blob/main/go2_him_21k_0.5379.pt) |
+| [DreamWaQ](https://arxiv.org/abs/2301.10602) | 0.5054 | 0.5105 | 0.6149 | 0.5730 | 5.74 | [ckpt](https://huggingface.co/wty-yy/go2_rl_gym_data/blob/main/go2_dwaq_119.5k_0.5054.pt) |
+
+<details>
+<summary><strong>RoboGauge 安装与启动</strong></summary>
+
+在训练环境安装客户端，并在 RoboGauge 环境启动服务端：
 
 ```bash
 # RoboGauge 仓库：安装客户端和完整评估运行环境
@@ -125,21 +193,20 @@ pip install -e .
 ./robogauge.sh --server --port 9973 --num-processes 30
 
 # 终端2，Go2 RL Lab 仓库，使用与服务端一致的端口
-cd /path/to/go2_rl_lab
+cd go2_rl_lab
 ./go2_rl_lab.sh --train --task go2-mixed-moe-cts \
   --robogauge --robogauge_port 9973
 ```
 
 客户端连接 `127.0.0.1`，因此服务端和训练进程需共享主机或网络命名空间。资源有限时可减小 `--num-processes`。评估文件保存在运行目录的 `jit_models/policy_jit_<iteration>.pt` 和 `robogauge_results/results_<iteration>.yaml`，标量分数记录在训练日志的 `RoboGauge/` 下
 
+</details>
+
 ### 🎬 2. 回放
 
 ```bash
 # 加载检查点、导出策略并可视化回放
 ./go2_rl_lab.sh --play --task go2-mixed-moe-cts --checkpoint /path/to/model_500.pt --viz rerun
-
-# 使用 headless Newton GL 录像
-./go2_rl_lab.sh --play --task go2-mixed-moe-cts --checkpoint /path/to/model_500.pt --video --video_length 200
 
 # 为并发 Rerun 会话指定独立端口
 ./go2_rl_lab.sh --play --task go2-mixed-moe-cts --checkpoint /path/to/model_500.pt --viz rerun --rerun-web-port 9091 --rerun-grpc-port 9092
@@ -158,9 +225,22 @@ cd /path/to/go2_rl_lab
 
 #### 🎥 可视化效果
 
-| Kit | Rerun | Newton |
-| :---: | :---: | :---: |
-| <img width="320" alt="Kit 可视化效果" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_isaaclab_encoded.gif" /> | <img width="320" alt="Rerun 可视化效果" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_rerun_encoded.gif" /> | <img width="320" alt="Newton 可视化效果" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_newton_encoded.gif" /> |
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="33%" align="center"><div align="center">Kit</div></th>
+      <th width="33%" align="center"><div align="center">Rerun</div></th>
+      <th width="33%" align="center"><div align="center">Newton</div></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><img width="100%" alt="Kit 可视化效果" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_isaaclab_encoded.gif" /></td>
+      <td align="center"><img width="100%" alt="Rerun 可视化效果" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_rerun_encoded.gif" /></td>
+      <td align="center"><img width="100%" alt="Newton 可视化效果" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/play_newton_encoded.gif" /></td>
+    </tr>
+  </tbody>
+</table>
 
 ### 🕹️ 3. Sim2Sim（MuJoCo）
 
@@ -168,24 +248,18 @@ cd /path/to/go2_rl_lab
 
 ```bash
 # 使用固定速度指令运行导出策略
-./go2_rl_lab.sh --deploy-mujoco --policy /path/to/exported/policy.pt --terrain flat --command 1.0 0.0 0.0
+./go2_rl_lab.sh --deploy-mujoco --policy /path/to/exported/policy.pt --terrain stairs
 ```
 
 [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoco/config.yaml) 中进行配置，可选场景：`flat`、`stairs`、`cross_slope`、`cross_stairs` 和 `race_track`
 
-<img width="640" alt="MuJoCo 部署演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/python_mujoco_encoded.gif" />
+<p align="center">
+  <img width="50%" alt="MuJoCo 部署演示" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/sim/python_mujoco_encoded.gif" />
+</p>
 
 ### 🤖 4. Sim2Real
 
 真机部署使用 C++，代码与使用说明见 [unitree_cpp_deploy - go2 branch](https://github.com/wty-yy/unitree_cpp_deploy/tree/go2)
-
-| 3.5m/s前进与4.4m/s后退 | 奔跑俯视 | 斜坡 |
-| :---: | :---: | :---: |
-| <img width="320" alt="真机前进与后退" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/forward_backward_1x_then_0.5x.gif" /> | <img width="320" alt="真机快速奔跑" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/overlook_fastrun_DJI_20261017143527_0110_D_encoded.gif" /> | <img width="320" alt="真机斜坡行走" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/slope_DJI_20261017142100_0108_D_encoded.gif" /> |
-
-| 楼梯 | 楼梯间 |
-| :---: | :---: |
-| <img width="320" alt="真机楼梯行走" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/forward_stairs_DJI_20261017144009_0111_D_encoded.gif" /> | <img width="320" alt="真机楼梯间行走" src="https://raw.githubusercontent.com/wty-yy/picture-bed/master/go2_rl_lab/real/stairwell_DJI_20261017145051_0117_D_encoded.gif" /> |
 
 ## 🧩 框架
 
@@ -223,3 +297,19 @@ cd /path/to/go2_rl_lab
 - Go2 USD 资源来自 [Unitree 模型数据集](https://huggingface.co/datasets/unitreerobotics/unitree_model)
 
 完整条款见合并后的 [LICENSE](LICENSE)、[内置 RSL-RL 许可证](source/rsl_rl/LICENSE) 和 [许可证声明](docs/licenses/)
+
+## 📚 引用
+
+如果我们的工作对你有所帮助，请引用：
+
+```bibtex
+@INPROCEEDINGS{WuT-RSS-26,
+    AUTHOR    = {Tianyang Wu AND Hanwei Guo AND Yuhang Wang AND Junshu Yang AND Xinyang Sui AND Jiayi Xie AND Xingyu Chen AND Zeyang Liu AND Xuguang Lan},
+    TITLE     = {{Toward Reliable Sim-to-Real Predictability for MoE-based Robust Quadrupedal Locomotion}},
+    BOOKTITLE = {Proceedings of Robotics: Science and Systems},
+    YEAR      = {2026},
+    ADDRESS   = {Sydney, Australia},
+    MONTH     = {July},
+    DOI       = {10.15607/RSS.2026.XXII.156}
+}
+```

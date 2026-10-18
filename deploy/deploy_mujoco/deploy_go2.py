@@ -10,6 +10,8 @@ velocities and yaw rate [vx, vy, yaw_rate] in [m/s, m/s, rad/s]. The gamepad's
 left stick controls forward/lateral velocity and its right stick controls yaw.
 Use --no-joystick for scripted commands and --headless --no-real-time for batch
 runs. Set MUJOCO_GL=egl when recording an offscreen video.
+CPU inference uses one thread by default; tune it with --inference-threads.
+The interactive viewer refreshes at --viewer-fps (default 60) independently of physics.
 """
 
 from __future__ import annotations
@@ -62,6 +64,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--duration", type=float, default=None, help="Maximum wall-clock duration in seconds.")
     parser.add_argument("--no-joystick", action="store_true", help="Ignore the joystick and use the config command.")
     parser.add_argument("--no-real-time", action="store_true")
+    parser.add_argument("--inference-threads", type=int, default=1, help="CPU threads for policy inference.")
+    parser.add_argument("--viewer-fps", type=float, default=60.0, help="Maximum interactive viewer refresh rate.")
     parser.add_argument("--headless", action="store_true", help="Run without the interactive MuJoCo viewer.")
     parser.add_argument("--save-video", action="store_true")
     parser.add_argument("--video-path", type=Path, default=None)
@@ -72,11 +76,18 @@ class VelocityDeployment:
     """Run an exported proprioceptive velocity policy with the training motor model."""
 
     def __init__(self, args: argparse.Namespace, config_path: Path) -> None:
+        """Retain the deployment arguments and configuration path."""
         self.args = args
         self.config_path = config_path
 
     def run(self) -> None:
+        """Run physics and policy control with independently paced visualization."""
         args = self.args
+        if args.inference_threads < 1:
+            raise ValueError("inference_threads must be at least one")
+        if not math.isfinite(args.viewer_fps) or args.viewer_fps <= 0.0:
+            raise ValueError("viewer_fps must be finite and positive")
+        torch.set_num_threads(args.inference_threads)
         config = load_config(self.config_path)
         command_kind = str(config.get("command_kind", ""))
         if command_kind != "command/body/velocity":
@@ -153,6 +164,14 @@ class VelocityDeployment:
         action = np.zeros(num_actions, dtype=np.float32)
         target_position_mujoco = default_position_mujoco.copy()
         observation = np.zeros(num_observations, dtype=np.float32)
+        observation_tensor = torch.from_numpy(observation).unsqueeze(0)
+        # Compile/warm the stateful export before starting the simulation clock.
+        # Restore history so warmup observations cannot affect the first action.
+        if hasattr(policy, "reset"):
+            with torch.inference_mode():
+                for _ in range(10):
+                    policy(observation_tensor)
+                policy.reset()
 
         control_decimation = int(config["control_decimation"])
         if control_decimation < 1:
@@ -193,6 +212,7 @@ class VelocityDeployment:
         print(f"[INFO] Command source: {command_source}")
         print(f"[INFO] Physics dt: {model.opt.timestep:.4f} s, control dt: {control_dt:.4f} s")
         print(f"[INFO] PD: Kp={stiffness_policy[0]:g}, Kd={damping_policy[0]:g}")
+        print(f"[INFO] CPU inference threads: {torch.get_num_threads()}, viewer limit: {args.viewer_fps:g} Hz")
 
         viewer = None
         if not args.headless:
@@ -219,10 +239,14 @@ class VelocityDeployment:
 
         counter = 0
         previous_sim_time = float(data.time)
-        start_time = time.time()
+        start_time = time.perf_counter()
+        next_step_time = start_time
+        next_viewer_time = start_time
+        next_status_time = start_time
+        viewer_interval = 1.0 / args.viewer_fps
+        maximum_catchup = max(0.1, control_dt)
         try:
-            while (viewer is None or viewer.is_running()) and time.time() - start_time < duration:
-                step_start = time.time()
+            while (viewer is None or viewer.is_running()) and time.perf_counter() - start_time < duration:
                 joint_position = data.qpos[qpos_indices]
                 joint_velocity = data.qvel[qvel_indices]
                 effort = pd_control(
@@ -238,9 +262,13 @@ class VelocityDeployment:
                 post_step_time = float(data.time)
 
                 render_utils.update(command, data)
-                if viewer is not None:
-                    render_utils.update_external_rendering(viewer, target="viewer")
+                if viewer is not None and time.perf_counter() >= next_viewer_time:
+                    with viewer.lock():
+                        render_utils.update_external_rendering(viewer, target="viewer")
                     viewer.sync()
+                    next_viewer_time += viewer_interval
+                    if next_viewer_time < time.perf_counter():
+                        next_viewer_time = time.perf_counter() + viewer_interval
 
                 # The native viewer's Reset button rewinds data.time. Detect a
                 # reset whether it occurred before mj_step or during viewer.sync().
@@ -253,6 +281,8 @@ class VelocityDeployment:
                     command = update_command()
                     counter = 0
                     previous_sim_time = float(data.time)
+                    next_step_time = time.perf_counter()
+                    next_viewer_time = next_step_time
                     print("\n[INFO] Viewer reset: simulation, policy state and command source restored.")
                     continue
 
@@ -278,7 +308,7 @@ class VelocityDeployment:
                     observation[9 + 2 * num_actions : 9 + 3 * num_actions] = action
 
                     with torch.inference_mode():
-                        policy_output = policy(torch.from_numpy(observation).unsqueeze(0))
+                        policy_output = policy(observation_tensor)
                     action = extract_policy_action(policy_output).detach().cpu().numpy().reshape(-1)
                     if action.shape != (num_actions,):
                         raise ValueError(f"Policy returned action shape {action.shape}, expected {(num_actions,)}")
@@ -287,6 +317,8 @@ class VelocityDeployment:
                     target_position_mujoco = target_position_policy[mujoco_from_policy]
 
                     command = update_command()
+                if time.perf_counter() >= next_status_time:
+                    next_status_time = time.perf_counter() + 0.2
                     quaternion = data.qpos[3:7]
                     local_velocity = quat_rotate_inverse(quaternion, data.qvel[:3])
                     qw, qx, qy, qz = quaternion
@@ -305,7 +337,13 @@ class VelocityDeployment:
                 previous_sim_time = float(data.time)
 
                 if real_time:
-                    remaining = model.opt.timestep - (time.time() - step_start)
+                    next_step_time += model.opt.timestep
+                    now = time.perf_counter()
+                    # Recover from ordinary overruns without accumulating drift;
+                    # discard excessive backlog after pauses or long GUI stalls.
+                    if now - next_step_time > maximum_catchup:
+                        next_step_time = now
+                    remaining = next_step_time - now
                     if remaining > 0.0:
                         time.sleep(remaining)
         finally:
@@ -321,6 +359,7 @@ class VelocityDeployment:
 
 
 def main() -> None:
+    """Parse CLI arguments and launch velocity deployment."""
     args = build_arg_parser().parse_args()
     VelocityDeployment(args, args.config.expanduser().resolve()).run()
 
