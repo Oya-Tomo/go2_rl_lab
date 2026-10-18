@@ -49,7 +49,7 @@ num_obs: 45
 # Scripted and joystick commands use the same direct velocity representation.
 command_kind: command/body/velocity
 command: [1.0, 0.0, 0.0]
-max_velocity_command: [2.0, 1.0, 2.0]
+max_velocity_command: [2.0, 1.0, 3.0]
 joystick: true
 real_time: true
 

@@ -1,11 +1,5 @@
 # Changelog
 
-## Unreleased
-
-1. Install video encoding dependencies during `--install` and automatically install unmet MuJoCo deployment requirements during `--deploy-mujoco`
-2. Remove `--install-mujoco` from the project CLI
-3. Automatically generate VS Code settings after `--install` completes package installation
-
 ## 0.4.5 - 2026-10-03
 
 1. Replace Neptune with SwanLab logging, including metrics, configs, code snapshots, run naming, CLI options, ignored outputs, and bilingual documentation
