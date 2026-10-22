@@ -38,7 +38,7 @@ ensure_optional_dependencies() {
 }
 
 usage() {
-    echo "Usage: ./go2_rl_lab.sh {--install|--generate-vscode-settings|--list|--train|--train-distributed|--play|--deploy-mujoco|--deploy-sdk2} [arguments]"
+    echo "Usage: ./go2_rl_lab.sh {--install|--generate-vscode-settings|--list|--train|--train-distributed|--play|--deploy-mujoco} [arguments]"
 }
 
 case "${1:-}" in
@@ -82,11 +82,6 @@ case "${1:-}" in
         shift
         ensure_optional_dependencies mujoco
         "${python_exe}" "${GO2_RL_LAB_PATH}/deploy/deploy_mujoco/deploy_go2.py" "$@"
-        ;;
-    --deploy-sdk2)
-        shift
-        # unitree_sdk2 deployment runs in its own uv environment (Python 3.10 for cyclonedds wheels).
-        uv run --project "${GO2_RL_LAB_PATH}/deploy/deploy_sdk2" python "${GO2_RL_LAB_PATH}/deploy/deploy_sdk2/deploy_go2.py" "$@"
         ;;
     -h|--help|"")
         usage

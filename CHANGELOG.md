@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-1. Add `deploy/deploy_sdk2` and `./go2_rl_lab.sh --deploy-sdk2` to run exported policies over unitree_sdk2 low-level DDS against unitree_mujoco and the real Go2, with passive/stand/policy states, keyboard and remote damping, tilt and LowState-timeout safety stops, and motion-control mode release on hardware
+1. Add `deploy/deploy_sdk2`, run with `uv run deploy_go2.py` in its own uv environment, to run exported policies over unitree_sdk2 low-level DDS against unitree_mujoco and the real Go2, with passive/stand/policy states, keyboard and remote damping, tilt and LowState-timeout safety stops, and motion-control mode release on hardware
 2. Add `--keyboard` to MuJoCo deployment for W/S, A/D, and Q/E velocity commands from a pygame window
 
 ## 0.4.5 - 2026-10-03

@@ -268,17 +268,18 @@ cd go2_rl_lab
 
 [`deploy/deploy_sdk2`](deploy/deploy_sdk2) 通过 unitree_sdk2 底层 DDS（`rt/lowstate` 与 `rt/lowcmd`）运行导出的 `policy.pt`。同一程序在回环接口上驱动 [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco) 的 `simulate_python`，在连接机器人的网卡上驱动真机。观测、动作与增益配置读取自 [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoco/config.yaml)，策略以 50 Hz 运行；由于仿真器仅在收到指令时重新计算 PD 力矩，`LowCmd` 以 500 Hz 重复发送
 
-需要 [uv](https://docs.astral.sh/uv/)；首次运行时根据 [`deploy/deploy_sdk2/uv.lock`](deploy/deploy_sdk2/uv.lock) 创建 Python 3.10 环境，并使用内置的 unitree_sdk2_python 子模块
+需要 [uv](https://docs.astral.sh/uv/)。请在 `deploy/deploy_sdk2` 目录下运行；首次 `uv run` 时根据 [`deploy/deploy_sdk2/uv.lock`](deploy/deploy_sdk2/uv.lock) 创建 Python 3.10 环境，并使用内置的 unitree_sdk2_python 子模块。未指定 `--policy` 时使用配置中的 `policy_path`
 
 ```bash
 # 获取 unitree_sdk2_python 子模块
 git submodule update --init deploy/deploy_sdk2/third_party/unitree_sdk2_python
+cd deploy/deploy_sdk2
 
 # 仿真：先以 DOMAIN_ID = 1、INTERFACE = "lo" 启动 unitree_mujoco 的 simulate_python
-./go2_rl_lab.sh --deploy-sdk2 --policy /path/to/exported/policy.pt
+uv run deploy_go2.py --policy /path/to/exported/policy.pt
 
 # 真机：在连接机器人的网卡（192.168.123.0/24）上使用 DDS domain 0
-./go2_rl_lab.sh --deploy-sdk2 --interface enp3s0 --policy /path/to/exported/policy.pt
+uv run deploy_go2.py --interface enp3s0 --policy /path/to/exported/policy.pt
 ```
 
 聚焦 `Go2 SDK2 policy` 窗口以操作状态机：`1` 从阻尼状态站起，`2` 在站立后启动策略，`Space` 返回阻尼状态，`Esc` 退出。W/S、A/D、Q/E 分别输入前后、横向与转向速度，按住 Shift 为最大速度。Unitree 遥控器的 L2+B 同样进入阻尼状态。机身倾斜超过约 60° 或 `rt/lowstate` 中断 0.1 s 时，控制器自动切换为阻尼状态

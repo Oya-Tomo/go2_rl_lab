@@ -268,17 +268,18 @@ Hardware deployment uses C++. See [unitree_cpp_deploy - go2 branch](https://gith
 
 [`deploy/deploy_sdk2`](deploy/deploy_sdk2) runs an exported `policy.pt` over unitree_sdk2 low-level DDS (`rt/lowstate` and `rt/lowcmd`). The same program drives [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco) `simulate_python` on the loopback interface and the real robot on its network interface. It reads observation, action, and gain settings from [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoco/config.yaml), runs the policy at 50 Hz, and repeats `LowCmd` at 500 Hz because the simulator recomputes PD torque only when a command arrives
 
-It requires [uv](https://docs.astral.sh/uv/); the first run creates a Python 3.10 environment from [`deploy/deploy_sdk2/uv.lock`](deploy/deploy_sdk2/uv.lock) with the bundled unitree_sdk2_python submodule
+It requires [uv](https://docs.astral.sh/uv/). Run it from `deploy/deploy_sdk2`; the first `uv run` creates a Python 3.10 environment from [`deploy/deploy_sdk2/uv.lock`](deploy/deploy_sdk2/uv.lock) with the bundled unitree_sdk2_python submodule. Without `--policy`, it uses the config's `policy_path`
 
 ```bash
 # Fetch the unitree_sdk2_python submodule
 git submodule update --init deploy/deploy_sdk2/third_party/unitree_sdk2_python
+cd deploy/deploy_sdk2
 
 # Simulator: start unitree_mujoco simulate_python with DOMAIN_ID = 1 and INTERFACE = "lo" first
-./go2_rl_lab.sh --deploy-sdk2 --policy /path/to/exported/policy.pt
+uv run deploy_go2.py --policy /path/to/exported/policy.pt
 
 # Real robot: DDS domain 0 on the network interface connected to the robot (192.168.123.0/24)
-./go2_rl_lab.sh --deploy-sdk2 --interface enp3s0 --policy /path/to/exported/policy.pt
+uv run deploy_go2.py --interface enp3s0 --policy /path/to/exported/policy.pt
 ```
 
 Focus the `Go2 SDK2 policy` window to drive the state machine: `1` stands up from passive damping, `2` starts the policy after standing, `Space` returns to passive damping, and `Esc` quits. W/S, A/D, and Q/E command forward, lateral, and yaw velocity; hold Shift for full speed. The Unitree remote's L2+B also enters passive damping. The controller switches to passive damping when the base tilts beyond about 60° or `rt/lowstate` stops for 0.1 s

@@ -13,14 +13,16 @@ Keys (focus the "Go2 SDK2 policy" window):
     Esc          passive damping and quit
 Unitree remote L2+B also enters passive damping from any state.
 
+Run from deploy/deploy_sdk2; uv creates the Python 3.10 environment from uv.lock on first use.
+
 Simulator: start unitree_mujoco simulate_python first (DOMAIN_ID = 1, INTERFACE = "lo"), then
-    ./go2_rl_lab.sh --deploy-sdk2 --policy /path/to/exported/policy.pt
+    uv run deploy_go2.py --policy /path/to/exported/policy.pt
 
 Real robot: pass the interface connected to the robot (domain 0 by default). After a typed
 confirmation the script lies the robot down and releases the active motion-control mode
 (sport service), so the official controller no longer fights LowCmd. It does not restore that
 mode on exit; reselect it with the app or reboot the robot.
-    ./go2_rl_lab.sh --deploy-sdk2 --interface enp3s0 --policy /path/to/exported/policy.pt
+    uv run deploy_go2.py --interface enp3s0 --policy /path/to/exported/policy.pt
 """
 
 from __future__ import annotations
