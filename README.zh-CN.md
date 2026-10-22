@@ -249,6 +249,9 @@ cd go2_rl_lab
 ```bash
 # 使用固定速度指令运行导出策略
 ./go2_rl_lab.sh --deploy-mujoco --policy /path/to/exported/policy.pt --terrain stairs
+
+# 在 pygame 窗口中用键盘输入速度：W/S 前后、A/D 横移、Q/E 转向，按住 Shift 为最大速度
+./go2_rl_lab.sh --deploy-mujoco --policy /path/to/exported/policy.pt --terrain stairs --keyboard
 ```
 
 [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoco/config.yaml) 中进行配置，可选场景：`flat`、`stairs`、`cross_slope`、`cross_stairs` 和 `race_track`
@@ -260,6 +263,27 @@ cd go2_rl_lab
 ### 🤖 4. Sim2Real
 
 真机部署使用 C++，代码与使用说明见 [unitree_cpp_deploy - go2 branch](https://github.com/wty-yy/unitree_cpp_deploy/tree/go2)
+
+#### 🐍 Python unitree_sdk2 部署
+
+[`deploy/deploy_sdk2`](deploy/deploy_sdk2) 通过 unitree_sdk2 底层 DDS（`rt/lowstate` 与 `rt/lowcmd`）运行导出的 `policy.pt`。同一程序在回环接口上驱动 [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco) 的 `simulate_python`，在连接机器人的网卡上驱动真机。观测、动作与增益配置读取自 [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoco/config.yaml)，策略以 50 Hz 运行；由于仿真器仅在收到指令时重新计算 PD 力矩，`LowCmd` 以 500 Hz 重复发送
+
+需要 [uv](https://docs.astral.sh/uv/)；首次运行时根据 [`deploy/deploy_sdk2/uv.lock`](deploy/deploy_sdk2/uv.lock) 创建 Python 3.10 环境，并使用内置的 unitree_sdk2_python 子模块
+
+```bash
+# 获取 unitree_sdk2_python 子模块
+git submodule update --init deploy/deploy_sdk2/third_party/unitree_sdk2_python
+
+# 仿真：先以 DOMAIN_ID = 1、INTERFACE = "lo" 启动 unitree_mujoco 的 simulate_python
+./go2_rl_lab.sh --deploy-sdk2 --policy /path/to/exported/policy.pt
+
+# 真机：在连接机器人的网卡（192.168.123.0/24）上使用 DDS domain 0
+./go2_rl_lab.sh --deploy-sdk2 --interface enp3s0 --policy /path/to/exported/policy.pt
+```
+
+聚焦 `Go2 SDK2 policy` 窗口以操作状态机：`1` 从阻尼状态站起，`2` 在站立后启动策略，`Space` 返回阻尼状态，`Esc` 退出。W/S、A/D、Q/E 分别输入前后、横向与转向速度，按住 Shift 为最大速度。Unitree 遥控器的 L2+B 同样进入阻尼状态。机身倾斜超过约 60° 或 `rt/lowstate` 中断 0.1 s 时，控制器自动切换为阻尼状态
+
+在真机上，程序先等待 `rt/lowstate`，再要求输入 `yes` 确认，随后让机器人趴下并释放当前运动控制模式，使 sport 服务不再控制电机。程序退出时不会恢复该模式，请在 Unitree App 中重新选择或重启机器人。首次运行请将机器人吊起，并在主机防火墙中放行来自 `192.168.123.0/24` 的 DDS 流量
 
 ## 🧩 框架
 
@@ -274,7 +298,9 @@ cd go2_rl_lab
 │   │   ├── assets/              # Go2 资源与电机模型
 │   │   └── physics/             # Newton 物理扩展
 │   └── rsl_rl/rsl_rl/           # PPO、MoE-CTS 与策略导出
-└── deploy/deploy_mujoco/        # MuJoCo 推理与场景
+└── deploy/
+    ├── deploy_mujoco/           # MuJoCo 推理与场景
+    └── deploy_sdk2/             # 基于 unitree_sdk2 DDS 的 unitree_mujoco 与真机部署
 ```
 
 ## 🎉 致谢
@@ -286,6 +312,7 @@ cd go2_rl_lab
 - [Go2 RL RobotLab](https://github.com/wertyuilife2/go2_rl_robotlab)：运动控制配置参考
 - [RoboGauge](https://github.com/wty-yy/RoboGauge)：策略评估
 - [MuJoCo](https://github.com/google-deepmind/mujoco)：独立仿真
+- [Unitree SDK2 Python](https://github.com/unitreerobotics/unitree_sdk2_python) 与 [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco)：底层 DDS 接口与仿真器
 
 ## 📄 许可证
 
@@ -295,6 +322,7 @@ cd go2_rl_lab
 - Isaac Lab 及原始 RSL-RL 代码采用 BSD 3-Clause
 - MuJoCo 部署保留 [Go2 RL Gym 声明](docs/licenses/go2-rl-gym-license.txt)
 - Go2 USD 资源来自 [Unitree 模型数据集](https://huggingface.co/datasets/unitreerobotics/unitree_model)
+- unitree_sdk2_python 子模块采用 BSD 3-Clause
 
 完整条款见合并后的 [LICENSE](LICENSE)、[内置 RSL-RL 许可证](source/rsl_rl/LICENSE) 和 [许可证声明](docs/licenses/)
 

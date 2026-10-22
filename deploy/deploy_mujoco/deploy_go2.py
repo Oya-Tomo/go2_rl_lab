@@ -8,6 +8,7 @@ The policy consumes one 45-dimensional proprioceptive frame and maintains its
 10-frame observation history internally. Commands are body-frame linear
 velocities and yaw rate [vx, vy, yaw_rate] in [m/s, m/s, rad/s]. The gamepad's
 left stick controls forward/lateral velocity and its right stick controls yaw.
+Use --keyboard to command W/S forward, A/D lateral and Q/E yaw from a pygame window.
 Use --no-joystick for scripted commands and --headless --no-real-time for batch
 runs. Set MUJOCO_GL=egl when recording an offscreen video.
 CPU inference uses one thread by default; tune it with --inference-threads.
@@ -34,7 +35,9 @@ from utils.mujoco import (
     get_gravity_orientation,
     get_joint_indices,
     get_velocity_joystick_command,
+    get_velocity_keyboard_command,
     initialize_joystick,
+    initialize_keyboard,
     load_config,
     pd_control,
     quat_rotate_inverse,
@@ -63,6 +66,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--duration", type=float, default=None, help="Maximum wall-clock duration in seconds.")
     parser.add_argument("--no-joystick", action="store_true", help="Ignore the joystick and use the config command.")
+    parser.add_argument("--keyboard", action="store_true", help="Command velocity with WASD/QE in a pygame window.")
     parser.add_argument("--no-real-time", action="store_true")
     parser.add_argument("--inference-threads", type=int, default=1, help="CPU threads for policy inference.")
     parser.add_argument("--viewer-fps", type=float, default=60.0, help="Maximum interactive viewer refresh rate.")
@@ -179,14 +183,20 @@ class VelocityDeployment:
         control_dt = model.opt.timestep * control_decimation
         duration = float(args.duration if args.duration is not None else config["simulation_duration"])
         real_time = bool(config["real_time"]) and not args.no_real_time
-        pygame, joystick = initialize_joystick(bool(config["joystick"]) and not args.no_joystick)
-        command_source = "joystick" if joystick is not None else "config"
+        if args.keyboard:
+            pygame, joystick = initialize_keyboard(), None
+            command_source = "keyboard"
+        else:
+            pygame, joystick = initialize_joystick(bool(config["joystick"]) and not args.no_joystick)
+            command_source = "joystick" if joystick is not None else "config"
 
         def update_command() -> np.ndarray:
-            """Sample body-frame velocity from the joystick or scripted command."""
-            if joystick is None:
-                return configured_command
-            return get_velocity_joystick_command(pygame, joystick, maximum_velocity_command)
+            """Sample body-frame velocity from the keyboard, joystick or scripted command."""
+            if command_source == "keyboard":
+                return get_velocity_keyboard_command(pygame, maximum_velocity_command)
+            if command_source == "joystick":
+                return get_velocity_joystick_command(pygame, joystick, maximum_velocity_command)
+            return configured_command
 
         command = update_command()
         render_utils = MujocoRenderUtils()

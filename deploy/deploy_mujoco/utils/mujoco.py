@@ -19,6 +19,10 @@ LEFT_STICK_FORWARD_AXIS = 1
 RIGHT_STICK_HORIZONTAL_AXIS = 3
 JOYSTICK_AXIS_DEADZONE = 0.1
 
+# Held keys command this fraction of max_velocity_command; Shift commands the full limit.
+KEYBOARD_COMMAND_FRACTION = 0.5
+KEYBOARD_WINDOW_SIZE = (360, 80)
+
 
 def get_gravity_orientation(quaternion: np.ndarray) -> np.ndarray:
     """Return the gravity direction expressed in the robot frame."""
@@ -152,6 +156,37 @@ def get_velocity_joystick_command(pygame, joystick, maximum_command: np.ndarray)
         [-axes[0] * maximum_command[0], -axes[1] * maximum_command[1], -axes[2] * maximum_command[2]],
         dtype=np.float32,
     )
+
+
+def initialize_keyboard():
+    """Open a small pygame window that receives WASD/QE keys, returning the pygame module."""
+    import pygame
+
+    pygame.init()
+    screen = pygame.display.set_mode(KEYBOARD_WINDOW_SIZE)
+    pygame.display.set_caption("Go2 keyboard command")
+    font = pygame.font.Font(None, 22)
+    for row, text in enumerate(("Focus this window: W/S forward, A/D lateral", "Q/E yaw, hold Shift for full speed")):
+        screen.blit(font.render(text, True, (230, 230, 230)), (12, 16 + 26 * row))
+    pygame.display.flip()
+    print("[INFO] Keyboard: focus the 'Go2 keyboard command' window and hold W/A/S/D/Q/E.")
+    return pygame
+
+
+def get_velocity_keyboard_command(pygame, maximum_command: np.ndarray) -> np.ndarray:
+    """Map held keys to a body-frame ``[vx, vy, yaw_rate]`` velocity intent."""
+    pygame.event.pump()
+    keys = pygame.key.get_pressed()
+    direction = np.array(
+        [
+            keys[pygame.K_w] - keys[pygame.K_s],
+            keys[pygame.K_a] - keys[pygame.K_d],
+            keys[pygame.K_q] - keys[pygame.K_e],
+        ],
+        dtype=np.float32,
+    )
+    full_speed = pygame.key.get_mods() & pygame.KMOD_SHIFT
+    return direction * maximum_command * (1.0 if full_speed else KEYBOARD_COMMAND_FRACTION)
 
 
 def configure_mujoco(model: mujoco.MjModel, config: dict) -> None:

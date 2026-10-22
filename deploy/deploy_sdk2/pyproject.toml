@@ -1,0 +1,26 @@
+[project]
+name = "go2-rl-lab-deploy-sdk2"
+version = "0.1.0"
+description = "Run exported Go2 RL Lab velocity policies over unitree_sdk2 low-level DDS"
+# cyclonedds 0.10.2, required by unitree_sdk2py, ships wheels up to CPython 3.10.
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "numpy",
+    "pygame",
+    "pyyaml",
+    "torch",
+    "unitree-sdk2py",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+# Editable install keeps the SDK package data (CRC shared libraries) and namespace subpackages.
+unitree-sdk2py = { path = "third_party/unitree_sdk2_python", editable = true }
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

@@ -27,6 +27,7 @@ Go2 RL Lab trains and evaluates Unitree Go2 velocity locomotion policies with Is
 | `source/go2_rl_lab/go2_rl_lab/utils/` | Terrain helpers, privileged height scans, symmetry, curricula, and configuration composition |
 | `source/rsl_rl/rsl_rl/` | Vendored RSL-RL algorithms, policies, storage, runners, logging, export, and RoboGauge integration |
 | `deploy/deploy_mujoco/` | Standalone MuJoCo inference and simulation-to-simulation deployment |
+| `deploy/deploy_sdk2/` | unitree_sdk2 low-level DDS deployment for unitree_mujoco and hardware, with its own uv environment (Python 3.10) and the unitree_sdk2_python submodule |
 | `docs/` | Project documentation and upstream license notices |
 
 Isaac Lab owns simulation, assets, sensors, scene replication, and manager-based environments. Gym registrations connect each task ID to its environment implementation and configuration entry points. The project configures observation, action, command, event, reward, termination, and curriculum managers rather than implementing a separate simulator loop.

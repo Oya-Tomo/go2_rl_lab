@@ -249,6 +249,9 @@ Playback writes these files to the checkpoint directory's `exported/` subdirecto
 ```bash
 # Run an exported policy with a fixed velocity command
 ./go2_rl_lab.sh --deploy-mujoco --policy /path/to/exported/policy.pt --terrain stairs
+
+# Command velocity from a pygame window: W/S forward, A/D lateral, Q/E yaw; hold Shift for full speed
+./go2_rl_lab.sh --deploy-mujoco --policy /path/to/exported/policy.pt --terrain stairs --keyboard
 ```
 
 Configure deployment in [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoco/config.yaml); available scenes are `flat`, `stairs`, `cross_slope`, `cross_stairs`, and `race_track`
@@ -260,6 +263,27 @@ Configure deployment in [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoc
 ### 🤖 4. Sim2Real
 
 Hardware deployment uses C++. See [unitree_cpp_deploy - go2 branch](https://github.com/wty-yy/unitree_cpp_deploy/tree/go2) for code and instructions
+
+#### 🐍 Python unitree_sdk2 Deployment
+
+[`deploy/deploy_sdk2`](deploy/deploy_sdk2) runs an exported `policy.pt` over unitree_sdk2 low-level DDS (`rt/lowstate` and `rt/lowcmd`). The same program drives [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco) `simulate_python` on the loopback interface and the real robot on its network interface. It reads observation, action, and gain settings from [`deploy/deploy_mujoco/config.yaml`](deploy/deploy_mujoco/config.yaml), runs the policy at 50 Hz, and repeats `LowCmd` at 500 Hz because the simulator recomputes PD torque only when a command arrives
+
+It requires [uv](https://docs.astral.sh/uv/); the first run creates a Python 3.10 environment from [`deploy/deploy_sdk2/uv.lock`](deploy/deploy_sdk2/uv.lock) with the bundled unitree_sdk2_python submodule
+
+```bash
+# Fetch the unitree_sdk2_python submodule
+git submodule update --init deploy/deploy_sdk2/third_party/unitree_sdk2_python
+
+# Simulator: start unitree_mujoco simulate_python with DOMAIN_ID = 1 and INTERFACE = "lo" first
+./go2_rl_lab.sh --deploy-sdk2 --policy /path/to/exported/policy.pt
+
+# Real robot: DDS domain 0 on the network interface connected to the robot (192.168.123.0/24)
+./go2_rl_lab.sh --deploy-sdk2 --interface enp3s0 --policy /path/to/exported/policy.pt
+```
+
+Focus the `Go2 SDK2 policy` window to drive the state machine: `1` stands up from passive damping, `2` starts the policy after standing, `Space` returns to passive damping, and `Esc` quits. W/S, A/D, and Q/E command forward, lateral, and yaw velocity; hold Shift for full speed. The Unitree remote's L2+B also enters passive damping. The controller switches to passive damping when the base tilts beyond about 60° or `rt/lowstate` stops for 0.1 s
+
+On the real robot, the program first waits for `rt/lowstate`, then asks for a typed `yes`, lies the robot down, and releases the active motion-control mode so the sport service no longer commands the motors. It does not restore that mode on exit; reselect it in the Unitree app or reboot the robot. Suspend the robot for the first run, and allow DDS traffic from `192.168.123.0/24` through the host firewall
 
 ## 🧩 Framework
 
@@ -274,7 +298,9 @@ Hardware deployment uses C++. See [unitree_cpp_deploy - go2 branch](https://gith
 │   │   ├── assets/              # Go2 assets and motor model
 │   │   └── physics/             # Newton physics extensions
 │   └── rsl_rl/rsl_rl/           # PPO, MoE-CTS, and policy export
-└── deploy/deploy_mujoco/        # MuJoCo inference and scenes
+└── deploy/
+    ├── deploy_mujoco/           # MuJoCo inference and scenes
+    └── deploy_sdk2/             # unitree_sdk2 DDS deployment for unitree_mujoco and hardware
 ```
 
 ## 🎉 Acknowledgements
@@ -286,6 +312,7 @@ Hardware deployment uses C++. See [unitree_cpp_deploy - go2 branch](https://gith
 - [Go2 RL RobotLab](https://github.com/wertyuilife2/go2_rl_robotlab): locomotion configuration reference
 - [RoboGauge](https://github.com/wty-yy/RoboGauge): policy evaluation
 - [MuJoCo](https://github.com/google-deepmind/mujoco): standalone simulation
+- [Unitree SDK2 Python](https://github.com/unitreerobotics/unitree_sdk2_python) and [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco): low-level DDS interface and simulator
 
 ## 📄 License
 
@@ -295,6 +322,7 @@ Project-owned code uses the [MIT License](LICENSE), copyright 2026 Tianyang Wu. 
 - Isaac Lab and original RSL-RL code use BSD 3-Clause
 - MuJoCo deployment retains the [Go2 RL Gym notice](docs/licenses/go2-rl-gym-license.txt)
 - Go2 USD assets come from the [Unitree model dataset](https://huggingface.co/datasets/unitreerobotics/unitree_model)
+- The unitree_sdk2_python submodule uses BSD 3-Clause
 
 See the consolidated [LICENSE](LICENSE), [vendored RSL-RL license](source/rsl_rl/LICENSE), and [license notices](docs/licenses/)
 
